@@ -1,0 +1,23 @@
+{
+  "name": "practicajs",
+  "version": "1.0.0",
+  "description": "practica",
+  "main": "todos.js",
+  "dependencies": {
+    "axios": "^0.18.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gaboisleno/Codexia.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gaboisleno/Codexia/issues"
+  },
+  "homepage": "https://github.com/gaboisleno/Codexia#readme"
+}
