@@ -51,25 +51,27 @@ async function dwnImage(url, imgName, folder){
         });
 };
 
-async function createAlbum(userID){
+async function createAlbums(userID){
     let albumes   = await getAlbumsUser(userID);
     let idAlbumes = albumes.map(element => {return element.id});
     console.log(idAlbumes);
 
     //Por cada AlbumId
     idAlbumes.forEach(async (item)=>{
-
+        console.log(item);
+        
         //Descargar el album
         let album = await getAlbum(idAlbumes[item]);
         console.log(album);
 
         //Crear una carpeta
-        newFolder(item);
+        await newFolder(item);
 
-        //Descargar cada foto del album/*
+        //Descargar cada foto del album
         album.forEach(async (foto)=>{
             await dwnImage(foto.url, foto.id, item);
-        }); 
+        });
+     
     });
 };
 
@@ -79,7 +81,7 @@ async function createAlbum(userID){
 async function main (){
     let user            = "Sincere@april.biz";
     let idUser          = await getUsrID(user);
-    createAlbum(idUser); 
+    createAlbums(idUser); 
 };
 
 main();
