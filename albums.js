@@ -1,7 +1,7 @@
+const axios = require('axios');
 
 //Devuelve el jon de una direccion url
 async function getJson(url){
-    const axios = require('axios');
     const pag   = await (axios.get(url)) ;
     return pag.data;
 };
@@ -13,17 +13,17 @@ async function getUsrID(email){
     return jsonFiltrado.id;
 };
 
-//Devuelve todos los almbumes de un usuario
+//Devuelve los almbumes de un usuario
 async function getAlbumsUser(userID){
     const jsonAlbums    = await getJson('https://jsonplaceholder.typicode.com/albums');
     const jsonFiltrado = jsonAlbums.filter(jsonAlbums => jsonAlbums.userId==userID);
     return (jsonFiltrado);
 };
 
-//Dado un id de album, devuelve ese album
+//Dado un ID de album, devuelve ese album
 async function getAlbum(albumId){
     const jsonPhotos   = await getJson('https://jsonplaceholder.typicode.com/photos');
-    const jsonAlbum = jsonPhotos.filter(jsonPhotos => jsonPhotos.albumId==albumId);
+    const jsonAlbum = jsonPhotos.filter(jsonPhotos => jsonPhotos.albumId == albumId);
     return (jsonAlbum);
 };
 
@@ -33,8 +33,14 @@ async function newFolder(nombre){
     const fs      = require('fs');
     const dir     = './'+nombre;
 
-    const mkFolder = Promise.promisify(fs.mkdirSync); 
-    fldr = await mkFolder(dir);
+    const mkFolder = Promise.promisify(fs.mkdir); 
+    
+    if (fs.existsSync(dir)) {
+        return false;
+    } else {
+        fldr = await mkFolder(dir);
+        return true;
+    }
 };
 
 //Dada una url descarga la imagen
@@ -43,36 +49,39 @@ async function dwnImage(url, imgName, folder){
     const axios   = require('axios');
     const Promise = require('bluebird');
 
-    const img     = await (axios.get(url));
+    const img     = await axios.get(url, {
+        responseType: 'arraybuffer'
+    });
     const saveimg = Promise.promisify(fs.writeFile);
 
-    const conten  = await saveimg(folder+'/'+imgName+'.png', img.data, function(err) {
-        if(err) {return console.log(err)};
-        });
+    await saveimg('./' + folder+'/'+imgName+'.png', img.data);
 };
 
-async function createAlbums(userID){
+//Descarga todos los albums de fotos de un usuario
+async function createRandomAlbum(userID){
     let albumes   = await getAlbumsUser(userID);
-    let idAlbumes = albumes.map(element => {return element.id});
-    console.log(idAlbumes);
+    let idAlbumes = albumes.map(element => element.id);
+    
+    //Elegir un album aleatorio
+    let rnd = idAlbumes[Math.floor(Math.random()*idAlbumes.length)];
+    console.log('Descargando album '+rnd+'...');
 
-    //Por cada AlbumId
-    idAlbumes.forEach(async (item)=>{
-        console.log(item);
-        
-        //Descargar el album
-        let album = await getAlbum(idAlbumes[item]);
-        console.log(album);
+    //Descargar el album aleatorio
+    let album = await getAlbum(rnd);
 
-        //Crear una carpeta
-        await newFolder(item);
+    //Crea una carpeta para guardar las fotos (si no existe)
+    let folderName = 'album_'+rnd;
 
-        //Descargar cada foto del album
+    if (await newFolder(folderName)){
         album.forEach(async (foto)=>{
-            await dwnImage(foto.url, foto.id, item);
-        });
-     
-    });
+            await dwnImage(foto.url, foto.id, folderName);
+        });  
+    
+        console.log('Descarga completa.');    
+    }
+    else console.log('El album ya existe.');
+    
+    
 };
 
 
@@ -81,7 +90,8 @@ async function createAlbums(userID){
 async function main (){
     let user            = "Sincere@april.biz";
     let idUser          = await getUsrID(user);
-    createAlbums(idUser); 
+    await createRandomAlbum(idUser); 
+    
 };
 
 main();
