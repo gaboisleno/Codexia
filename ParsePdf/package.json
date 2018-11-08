@@ -1,0 +1,23 @@
+{
+  "name": "pdf2json",
+  "version": "1.0.0",
+  "description": "",
+  "main": "parse.js",
+  "dependencies": {
+    "pdf2json": "^1.1.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/modesty/pdf2json.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/modesty/pdf2json/issues"
+  },
+  "homepage": "https://github.com/modesty/pdf2json#readme"
+}
