@@ -1,4 +1,4 @@
-let fs = require('fs'),
+let fs = require('fs');
 PDFParser = require("pdf2json");
 
 let pdfParser = new PDFParser();
@@ -20,20 +20,24 @@ pdfParser.on("pdfParser_dataReady", pdfData => {
     var bordeX       = 13;
     var prices       = {};
 
-                                                            //Bucle por cada pagina
+    //Bucle por cada pagina
     for (let pag=0; pag < json.formImage.Pages.length; pag++){
         textPage = json.formImage.Pages[pag].Texts.length;
-
+    
+        //Bucle por cada objeto
         for (let i=0; i < textPage; i++){  
-
+    
+            //Bucle por cada elemento dentro del objeto
             for(let x=0; x < json.formImage.Pages[pag].Texts[i].R.length; x++){
                 
                 const element = json.formImage.Pages[pag].Texts[i].R[x];
-
-                if (element.T == 'I' || element.T == 'N'){       //Por cada elemento texto que comienza con I/N
-                    
-                    if (vehiculo.length != 0) {                  //Si la longitud del [] == 0 no se inserta en la lista
-                    
+    
+                //Por cada elemento texto que comienza con I/N
+                if (element.T == 'I' || element.T == 'N' || element.T.startsWith("P%C3%A1gina")){
+    
+                    //Si la informacion no esta vacia, inserto el vehiculo
+                    if (vehiculo.length != 0) {             
+                        
                         let autoInfo = {
                             in:         vehiculo[0],
                             mtm:        vehiculo[1],
@@ -49,37 +53,43 @@ pdfParser.on("pdfParser_dataReady", pdfData => {
                         Object.assign(autoInfo, prices);
                         objList.push(autoInfo);
                     }
-
-                    vehiculo = [];                               //Se resetea la informacion del auto
+                    //Si es el final de pag
+                    if (element.T.startsWith("P%C3%A1gina")){   
+                        break;
+                    }
+                    //Se resetea la informacion del auto
+                    vehiculo = [];                              
                     prices = {};
                     vehiculo.push(element.T);
+                    continue;
                 }
-                
-                else if (element.T.startsWith("P%C3%A1gina")){   //Comprobar fin de hoja Página 1 de 401
-                    listVehiculo.push(vehiculo);
-                    break;
-                }
-                
-                else if(element.T.endsWith('%20')){              //Palabras cortadas en dos renglones
+                //Palabras cortadas en dos renglones
+                else if(element.T.endsWith('%20')){             
                     bandera = true;
                     tmpStr  = '';
                     tmpStr  = (element.T);
                     continue;
                 }
-
+                //Si el texto no es I/N, se inserta informacion del auto al []
                 else{
-                    if (bandera){                               //Si el texto no es I/N, se inserta informacion del auto al []
+                    if (bandera){                               
                         vehiculo.push(cleanWord(tmpStr+element.T));
                         tmpStr ='';
                         bandera = false;
+                        continue;
                     }
-
-                    else {                                      //Comprobar si x > 13, comienzan los precios
+                    //Comprobar si x > 13, comienzan los precios
+                    else {                                      
                         if ((json.formImage.Pages[pag].Texts[i].x) > bordeX && (json.formImage.Pages[pag].Texts[i].y) > bordeY){
                             anio = getYear(json.formImage.Pages[pag].Texts[i].x);
-                            //vehiculo.push(element.T);
-                            prices[anio] = element.T;    
-                        }                                       //Comprobar que el texto no sea el nombre de los campos
+                            prices[anio] = element.T;
+                            continue;    
+                        }                                       
+                        //Comprobar si el campo Fab esta vacio
+                        if (vehiculo[3]==null && json.formImage.Pages[pag].Texts[i].x > 3.899){
+                            vehiculo.push('');
+                        }
+                        //Comprobar que el texto no sea el nombre de los campos
                         else if ((json.formImage.Pages[pag].Texts[i].y) > bordeY){ 
                             vehiculo.push(cleanWord(element.T));
                         }
@@ -90,25 +100,22 @@ pdfParser.on("pdfParser_dataReady", pdfData => {
     }
 
     console.log(objList);
-    //console.log('Autos en esta pagina: '+(listVehiculo.length-1));   
+    //console.log('Autos en esta pagina: '+(listVehiculo.length-1));
+    
 
 });
 
 
 /*
-     __  __       _       
-    |  \/  |     (_)      
-    | \  / | __ _ _ _ __  
-    | |\/| |/ _` | | '_ \ 
-    | |  | | (_| | | | | |
-    |_|  |_|\__,_|_|_| |_|*/
+ __  __       _       
+|  \/  |     (_)      
+| \  / | __ _ _ _ __  
+| |\/| |/ _` | | '_ \ 
+| |  | | (_| | | | | |
+|_|  |_|\__,_|_|_| |_|*/
+
 
 pdfParser.loadPDF("./real.pdf");
-
-
-
-
-
 
 
 
@@ -196,7 +203,7 @@ function getYear(x){
     }
 }
 
-
+//Fab 3.875
 /*-=TABLA DE ANIOS=-*/
 /*
 X = 14.736 (0km)
