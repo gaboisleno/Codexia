@@ -86,11 +86,11 @@ pdfParser.on("pdfParser_dataReady", pdfData => {
                             continue;    
                         }                                       
                         //Comprobar si el campo Fab esta vacio
-                        if (vehiculo[3]==null && json.formImage.Pages[pag].Texts[i].x > 3.899){
+                        if (vehiculo[3]==null && json.formImage.Pages[pag].Texts[i].x > 3.899 && json.formImage.Pages[pag].Texts[i].y > bordeY){
                             vehiculo.push('');
                         }
                         //Comprobar que el texto no sea el nombre de los campos
-                        else if ((json.formImage.Pages[pag].Texts[i].y) > bordeY){ 
+                        if ((json.formImage.Pages[pag].Texts[i].y) > bordeY){ 
                             vehiculo.push(cleanWord(element.T));
                         }
                     }
@@ -100,6 +100,7 @@ pdfParser.on("pdfParser_dataReady", pdfData => {
     }
 
     console.log(objList);
+    //console.log(objList.length);
     //console.log('Autos en esta pagina: '+(listVehiculo.length-1));
     
 
